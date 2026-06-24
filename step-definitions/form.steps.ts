@@ -1,7 +1,9 @@
+// step definitions call page object methods to perform and execute actions using Page object
+
+
 import { Given, When, Then, DataTable } from "@cucumber/cucumber";
 
 import { world } from "../utils/world";
-import { ERROR_MESSAGES } from "../utils/messages";
 
 Given("user is on form page", async function () {
   await world.formPage.navigate();
@@ -69,11 +71,7 @@ Then(
   "form should be submitted successfully",
 
   async function () {
-    const isSubmitted = await world.formPage.verifySubmission();
-
-    if (!isSubmitted) {
-      throw new Error(ERROR_MESSAGES.FORM_SUBMISSION);
-    }
+    await world.formPage.verifySubmission();
   },
 );
 
@@ -81,10 +79,6 @@ Then(
   "email field should show validation error",
 
   async function () {
-    const isInvalid = await world.formPage.isEmailValidationErrorDisplayed();
-
-    if (!isInvalid) {
-      throw new Error(ERROR_MESSAGES.EMAIL_VALIDATION);
-    }
+    await world.formPage.verifyEmailValidationError();
   },
 );

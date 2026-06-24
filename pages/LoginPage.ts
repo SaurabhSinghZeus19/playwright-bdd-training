@@ -1,53 +1,124 @@
 import { Page } from "playwright";
-    import { URLS } from "../utils/constants";
-    import { TIMEOUTS } from "../utils/constants";
+
+import { URLS, TIMEOUTS } from "../utils/constants";
+
+import { ERROR_MESSAGES } from "../utils/messages";
 
 export class LoginPage {
-  constructor(private page: Page) {}
+  constructor(private page: Page) {} 
 
-  async navigate() {
-    console.log("Opening URL");
+    // Locators
+
+  private get usernameInput() {           // username input field
+    return this.page.locator("#username");
+  }
+
+  private get passwordInput() {           // password input field
+    return this.page.locator("#password");
+  }
+
+  private get loginButton() {             // login button
+    return this.page.locator('button[type="submit"]');
+  }
+
+  private get logoutButton() {            // logout button
+    return this.page.locator('a[href="/logout"]');
+  }
+
+  private get errorMessage() {            // error message
+    return this.page.locator("#flash");
+  } 
+  // Navigation Actions
+
+  // open login pages and wait for the page to load
+    async navigate() {
     await this.page.goto(URLS.LOGIN, {
-      waitUntil: "commit",
+      waitUntil: "commit", // waits for navigation to be committed
+
       timeout: TIMEOUTS.PAGE_LOAD,
     });
-    await this.page.waitForLoadState("domcontentloaded");
-    await this.page.waitForSelector("#username", {
+
+    await this.page.waitForLoadState("domcontentloaded");  // waits until the page is loaded
+
+    await this.usernameInput.waitFor({    // waits for the username input field to be visible
       state: "visible",
+
       timeout: TIMEOUTS.ELEMENT,
     });
-    console.log("Current URL:", this.page.url());
-    console.log("URL Opened");
-  }
+  } 
+  // Login Actions
+
+  // username input field
   async enterUsername(username: string) {
-    console.log("Before username fill URL:", this.page.url());
-    await this.page.locator("#username").fill(username);
+    await this.usernameInput.fill(username);
   }
-  async enterPassword(password: string) {
-    await this.page.locator("#password").fill(password);
+
+  async enterPassword(password: string) {   // password input field
+    await this.passwordInput.fill(password);
   }
-  async clickLogin() {
-    await this.page.locator('button[type="submit"]').click();
+
+  async clickLogin() {               // click login button
+    await this.loginButton.click();
   }
-  async clickLogout() {
-    await this.page.locator('a[href="/logout"]').click();
-  }
-  async getErrorMessage() {
-    return this.page.locator("#flash");
-  }
-  async login(username: string, password: string) {
+
+  async login(username: string, password: string) { // perform complete login action
     await this.enterUsername(username);
+
     await this.enterPassword(password);
+
     await this.clickLogin();
-  }
+  } 
+  // Logout Actions
 
-  async verifyDashboard() {
+
+  async clickLogout() {
+    await this.logoutButton.click();
+  } 
+  // Verification Methods
+
+  // verify successful login by checking dashboard url
+  async verifyDashboard() {       
     await this.page.waitForURL("**/secure");
-    return this.page.url().includes("/secure");
-  }
 
+    if (!this.page.url().includes("/secure")) {
+      throw new Error(ERROR_MESSAGES.DASHBOARD_NAVIGATION);
+    }
+  }
+  // verifies user is redirected to login page 
   async verifyLoginPage() {
     await this.page.waitForURL("**/login");
-    return this.page.url().includes("/login");
+
+    if (!this.page.url().includes("/login")) {
+      throw new Error(ERROR_MESSAGES.LOGIN_PAGE_REDIRECT);
+    }
+  }
+  
+  // verifies invalid login error message
+  async verifyInvalidLoginMessage() {
+    await this.errorMessage.waitFor();
+
+    const text = await this.errorMessage.textContent();
+
+    if (!text?.includes("Your password is invalid!")) {
+      throw new Error(ERROR_MESSAGES.INVALID_ERROR_MESSAGE);
+    }
+  }
+
+  //verify login result based on outcome
+  async verifyLoginResult(result: string) {
+    switch (result.toLowerCase()) {
+      case "success":
+        await this.verifyDashboard();
+
+        break;
+
+      case "failure":
+        await this.verifyInvalidLoginMessage();
+
+        break;
+
+      default:
+        throw new Error(`Invalid result type: ${result}`);
+    }
   }
 }

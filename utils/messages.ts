@@ -7,7 +7,8 @@ export const ERROR_MESSAGES = {
 
   LOGIN_SUCCESS: "Login should have succeeded",
 
-  FORM_SUBMISSION: "Form submission failed",
+  FORM_SUBMISSION_FAILED: "Form submission failed",
 
-  EMAIL_VALIDATION: "Email validation error not displayed",
+  EMAIL_VALIDATION_ERROR: "Email validation error not displayed",
 };
+
