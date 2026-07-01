@@ -1,38 +1,24 @@
 // step definitions call page object methods to perform and execute actions using Page object
-
 import { Given, When, Then, setDefaultTimeout } from "@cucumber/cucumber";
-
 import { world } from "../utils/world";
-
 import { users } from "../utils/testData";
-
 import { TIMEOUTS } from "../utils/constants";
 
 setDefaultTimeout(TIMEOUTS.DEFAULT);
 
-Given("user is on login page", async function () {
-  await world.loginPage.navigate();
-});
+Given("user is on login page", async function () {await world.loginPage.navigate();});
 
 When("user enters valid username and password", async function () {
   await world.loginPage.enterUsername(users.validUser.username);
-
-  await world.loginPage.enterPassword(users.validUser.password);
-});
+  await world.loginPage.enterPassword(users.validUser.password);});
 
 When("user enters invalid credentials", async function () {
   await world.loginPage.enterUsername(users.invalidUser.username);
+  await world.loginPage.enterPassword(users.invalidUser.password);});
 
-  await world.loginPage.enterPassword(users.invalidUser.password);
-});
+When("user clicks on login button", async function () {await world.loginPage.clickLogin();});
 
-When("user clicks on login button", async function () {
-  await world.loginPage.clickLogin();
-});
-
-Then("user should be navigated to dashboard", async function () {
-  await world.loginPage.verifyDashboard();
-});
+Then("user should be navigated to dashboard", async function () {await world.loginPage.verifyDashboard();});
 
 Then("error message should be displayed", async function () {
   await world.loginPage.verifyInvalidLoginMessage();

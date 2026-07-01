@@ -5,86 +5,115 @@ import { URLS, TIMEOUTS } from "../utils/constants";
 import { ERROR_MESSAGES } from "../utils/messages";
 
 export class LoginPage {
-  constructor(private page: Page) {} 
+  constructor(private page: Page) {}
 
-    // Locators
-
-  private get usernameInput() {           // username input field
+  /**
+   * @description username input field
+   */
+  private get usernameInput() {
     return this.page.locator("#username");
   }
-
-  private get passwordInput() {           // password input field
+  /**
+   * @description password input field
+   */
+  private get passwordInput() {
     return this.page.locator("#password");
   }
-
-  private get loginButton() {             // login button
+  /**
+   * @description login button
+   */
+  private get loginButton() {
     return this.page.locator('button[type="submit"]');
   }
-
-  private get logoutButton() {            // logout button
+  /**
+   * @description logout button
+   */
+  private get logoutButton() {
     return this.page.locator('a[href="/logout"]');
   }
-
-  private get errorMessage() {            // error message
+  /**
+   * @description error message
+   */
+  private get errorMessage() {
     return this.page.locator("#flash");
-  } 
-  // Navigation Actions
+  }
 
-  // open login pages and wait for the page to load
-    async navigate() {
+  /**
+   * @description open login pages and wait for the page to load
+   */
+  async navigate() {
     await this.page.goto(URLS.LOGIN, {
-      waitUntil: "commit", // waits for navigation to be committed
+      /**
+       * @description waits for navigation to be committed
+       */
+      waitUntil: "commit",
 
       timeout: TIMEOUTS.PAGE_LOAD,
     });
-
-    await this.page.waitForLoadState("domcontentloaded");  // waits until the page is loaded
-
-    await this.usernameInput.waitFor({    // waits for the username input field to be visible
+    /**
+     * @description waits until the page is loaded
+     */
+    await this.page.waitForLoadState("domcontentloaded");
+    /**
+     * @description waits for the username input field to be visible
+     */
+    await this.usernameInput.waitFor({
       state: "visible",
 
       timeout: TIMEOUTS.ELEMENT,
     });
-  } 
-  // Login Actions
+  }
 
-  // username input field
+  /**
+   * @description username input field
+   */
   async enterUsername(username: string) {
     await this.usernameInput.fill(username);
   }
-
-  async enterPassword(password: string) {   // password input field
+  /**
+   * @description  password input field
+   */
+  async enterPassword(password: string) {
     await this.passwordInput.fill(password);
   }
-
-  async clickLogin() {               // click login button
+  /**
+   * @description  click login button
+   */
+  async clickLogin() {
     await this.loginButton.click();
   }
-
-  async login(username: string, password: string) { // perform complete login action
+  /**
+   * @description perform complete login action
+   */
+  async login(username: string, password: string) {
     await this.enterUsername(username);
 
     await this.enterPassword(password);
 
     await this.clickLogin();
-  } 
-  // Logout Actions
+  }
 
+  /**
+   * @description Logout Actions
+   */
 
   async clickLogout() {
     await this.logoutButton.click();
-  } 
-  // Verification Methods
+  }
+  /**
+   * @description  verify successful login by checking dashboard url
+   */
 
-  // verify successful login by checking dashboard url
-  async verifyDashboard() {       
+  async verifyDashboard() {
     await this.page.waitForURL("**/secure");
 
     if (!this.page.url().includes("/secure")) {
       throw new Error(ERROR_MESSAGES.DASHBOARD_NAVIGATION);
     }
   }
-  // verifies user is redirected to login page 
+  /**
+   * @description verifies user is redirected to login page
+   */
   async verifyLoginPage() {
     await this.page.waitForURL("**/login");
 
@@ -92,8 +121,10 @@ export class LoginPage {
       throw new Error(ERROR_MESSAGES.LOGIN_PAGE_REDIRECT);
     }
   }
-  
-  // verifies invalid login error message
+  /**
+   * @description verifies invalid login error message
+   */
+
   async verifyInvalidLoginMessage() {
     await this.errorMessage.waitFor();
 
@@ -103,8 +134,10 @@ export class LoginPage {
       throw new Error(ERROR_MESSAGES.INVALID_ERROR_MESSAGE);
     }
   }
+  /**
+   * @description verify login result based on outcome
+   */
 
-  //verify login result based on outcome
   async verifyLoginResult(result: string) {
     switch (result.toLowerCase()) {
       case "success":
